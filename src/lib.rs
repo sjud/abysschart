@@ -9,41 +9,41 @@ use leptos_router::*;
 pub mod fallback;
 pub mod error_template;
 pub mod sidebar;
-
-#[derive(Copy,Clone,Debug,PartialEq)]
-pub enum BackgroundImage{
-    Homepage,
-    None,
-}
-impl BackgroundImage{
-    /// Will output a line of css "background-image: url(...);"
-    pub fn to_css(&self) -> &'static str {
-        match &self {
-            Self::Homepage => "background-image: url(/backgrounds/homepage.png)",
-            Self::None => {leptos::logging::error!("None");""},
-
-        }
-       }
-}
-#[derive(Copy,Clone,Debug,PartialEq)]
-pub struct RwBackgroundImage(RwSignal<BackgroundImage>);
+pub mod body;
+pub mod windows;
+pub mod user_info;
+pub mod client_state;
+use client_state::ClientState;
+#[cfg(feature="ssr")]
+pub mod env_vars;
+#[cfg(feature="ssr")]
+pub mod backend_utils;
+#[cfg(feature="ssr")]
+pub mod server_state;
+pub mod login;
+pub mod user_msg;
 #[component]
 pub fn App() -> impl IntoView {
-provide_meta_context();
-    provide_context(RwBackgroundImage(create_rw_signal(BackgroundImage::Homepage)));
-
+    provide_meta_context();
+    
     view! {
         <Stylesheet id="leptos" href="/pkg/abysschart.css"/>
         <Link rel="shortcut icon" type_="image/ico" href="/favicon.ico"/>
         <Meta name="description" content="AbyssChart"/>
         <Router>
             <main>
-            <SetBody/>
                 <Routes>
-                    <Route path="" view=move || view!{
-                        <button class="h-20 w-20 bg-white" on:click=move |_| panic!("")/>
+                    <Route path="/" view=|| view!{
+                        <ContextIsland>
+                        <Outlet/>
+                        <user_msg::UserMsg/>
+                        <body::SetBody/>
                         <sidebar::SideBar/>
-                    }/>
+                        <windows::WindowAggregator/>
+                        </ContextIsland>
+                    }>
+                        <Route path="" view=|| view!{<HomePage/>}/>
+                    </Route>
                 </Routes>
             </main>
         </Router>
@@ -51,13 +51,20 @@ provide_meta_context();
 }
 
 #[component]
-pub fn SetBody() -> impl IntoView {
-    let bg = expect_context::<RwBackgroundImage>();
-    let body_style = move || format!("{};background-repeat: repeat;",bg.0().to_css());
+pub fn HomePage() -> impl IntoView {
     view!{
-        <Body attr:style=body_style()/>
+        <login::Login/>
     }
 }
+
+#[island]
+pub fn ContextIsland(children:Children) -> impl IntoView {
+    let rw_client_state = create_rw_signal(ClientState::default());
+    provide_context(rw_client_state);
+    children()
+}
+
+
 
 // Needs to be in lib.rs AFAIK because wasm-bindgen needs us to be compiling a lib. I may be wrong.
 cfg_if! {

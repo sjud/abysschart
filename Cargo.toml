@@ -13,44 +13,55 @@ lto = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+async-trait = {version = "0.1.68",optional=true}
 axum = { version = "0.6.4", optional = true }
+axum-extra = { version = "0.7.4", optional = true, features=["cookie"] }
 cfg-if = "1"
 console_error_panic_hook = "0.1.7"
 console_log = "0.2"
+dotenv_codegen = {version="0.15.0",optional = true}
 futures = { version = "0.3.28", default-features = false, optional = true }
 http = { version = "0.2.8", optional = true }
-lazy_static = "1.4.0"
-leptos = { version = "0.5.2", features = ["nightly", "serde"] }
-leptos_axum = { version = "0.5.2", optional = true }
+hmac = {version="0.12.1",optional = true}
+jwt = "0.16.0"
+lazy_static = {version = "1.4.0", optional = true}
+leptos = { version = "0.5.2", features = ["nightly", "serde", "experimental-islands"] }
+leptos_axum = { version = "0.5.2", optional = true, features = ["experimental-islands"]}
 leptos_meta = { version = "0.5.2", features = ["nightly"]}
 leptos_router = { version = "0.5.2", features = ["nightly"] }
 leptos_sse = "0.2.0"
 log = "0.4"
 serde = { version = "1.0.148", features = ["derive"] }
+sha2 = {version="0.10.2",optional = true}
+time = { version = "0.3.30" }
 tower = { version = "0.4.13", optional = true }
-tower-http = { version = "0.4", features = [
-  "fs",
-  "compression-br",
-], optional = true }
+tower-http = {version="0.4.0",features=["fs","set-header","compression-br","cors","auth","propagate-header"],optional = true}
 tokio = { version = "1.22.0", features = ["full"], optional = true }
+uuid = { version = "1.5.0", features = ["serde","js","v4"]}
 wasm-bindgen = "0.2.88" 
-web-sys = { version = "0.3.65", features=["Document","HtmlElement","CssStyleDeclaration"] }
+web-sys = { version = "0.3.65", features=["HtmlDocument","Document","HtmlElement","CssStyleDeclaration"] }
 
 [features]
 default = []
 hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
 ssr = [
+    "async-trait",
     "axum",
+    "axum-extra",
+    "dotenv_codegen",
     "http",
-    "tower",
-    "tower-http",
-    "tokio",
+    "hmac",
+    "lazy_static",
     "leptos_sse/ssr",
     "leptos_sse/axum",
     "leptos/ssr",
     "leptos_axum",
     "leptos_meta/ssr",
     "leptos_router/ssr",
+    "tower",
+    "tower-http",
+    "tokio",
+    "sha2",
 ]
 
 
